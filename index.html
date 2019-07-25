@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <title>The Bouncing Ball Game</title>
+    <script type="text/javascript" src="libs/three.js"></script>
+
+    <script type="text/javascript" src="libs/stats.js"></script>
+	
+	<script src="fonts/helvetiker_regular.typeface.js"></script>
+	
+	<script src="libs/keyboard.js"></script>
+	
+	<script src="libs/physi.js"></script>
+	
+	<link rel="stylesheet" href="css/styles.css">
+ 
+</head>
+<body>
+  <script src="js/bouncingBallGame.js"></script>
+  <script src="js/customShaders3.js"></script>
+<div id="Stats-output">
+</div>
+<!-- Div which will hold the Output -->
+<div id="WebGL-output">
+
+</div>
+<button id="gameInstructions-button" onclick="var dialog = document.getElementById('gameInstructions-dialog'); dialog.style.display = 'block';">Help</button>
+			<div id="gameInstructions-dialog" class="dialog">
+				<h3>About the Game</h3>
+				<p> Bounce the ball as much as you can without crashing to any objects in the plane<p>
+				<h3>General Controls</h3>
+				<p><b>A:</b> to move the ball to the left.</p>
+				<p><b>D:</b> to move the ball to the right.</p>
+            <button onclick="var dialog = document.getElementById('gameInstructions-dialog'); dialog.style.display = 'none';">Continue</button>
+        </div>
+<!-- Javascript code that runs our Three.js examples -->
+
+
+
+
+
+
+
+
+ 
+  
+<script type="text/x-glsl" id="vertex">
+varying vec2 uVu;
+void main()
+{
+	uVu = uv;
+
+	gl_Position = projectionMatrix *
+		modelViewMatrix *
+		vec4(position,1.0);
+}
+</script>
+<!--Fragment shader This shader defines the color of each pixel that is passed in. -->
+
+<!--Varyings are variables that are passed from the vertex shader to the fragment shader. For each fragment, the value of each varying will be smoothly interpolated from the values of adjacent vertices.. -->
+
+<!--uniforms This allows you to send information to your shader. The same
+information is sent to each vertex and fragment.-->
+<script type="text/x-glsl" id="fragment3">
+varying vec2 uVu;
+uniform float time;
+
+float box( in vec2 _st, in vec2 _size )
+{
+    _size = vec2( 0.5 ) - _size * 0.5;
+	
+	// smoothstep — perform Hermite interpolation between two values
+    vec2 uv = smoothstep( _size, _size + vec2( 0.001 ), _st );
+    uv *= smoothstep( _size, _size + vec2( 0.401 ), vec2( 1.0 ) - _st );
+	
+    return uv.x * uv.y;
+}
+
+float cross( in vec2 _st, float _size )
+{
+    return  box( _st, vec2( _size, _size / 4.0 ) ) + 
+            box( _st, vec2( _size / 4.0, _size ) ) +
+            box( _st, vec2( _size / 1.0, _size ) ) +
+			box( _st, vec2( _size, _size / 4.0 ) ) + 
+            box( _st, vec2( _size / 5.0, _size ) ) +
+            box( _st, vec2( _size / 2.0, _size ) );
+}
+
+void main()
+{
+	vec2 st = uVu;
+	vec3 color = vec3( 0.5 );
+	
+	vec2 translate = vec2( cos( time )/sin(time), sin( time ) );
+    st += translate * 0.35;
+	
+    color += vec3( cross( st, 0.55 ) );
+    gl_FragColor = vec4( color, 5.0 );
+}
+</script>
+
+<script type="text/x-glsl" id="fragment4">
+#define PI 3.14159265359
+
+varying vec2 uVu;
+uniform float time;
+
+float box( in vec2 _st, in vec2 _size )
+{
+    _size = vec2( 0.5 ) - _size * 0.5;
+	
+	// smoothstep — perform Hermite interpolation between two values
+    vec2 uv = smoothstep( _size, _size + vec2( 0.001 ), _st );
+    uv *= smoothstep( _size, _size + vec2( 0.001 ), vec2( 1.2 ) - _st );
+	
+    return uv.x * uv.y;
+}
+
+float whiteSquare( in vec2 _st, float _size )
+{
+    return  box( _st, vec2( _size, _size / 1.0 ) ) + 
+            box( _st, vec2( _size / 1.0, _size  ) );
+}
+
+mat2 rotate2d( float _angle )
+{
+    return mat2( cos( _angle ), -sin( _angle ),
+                 sin( _angle ),  cos( _angle ) );
+}
+
+void main()
+{
+	vec2 st = uVu;
+	vec3 color = vec3( 0.0 );
+	
+	st -= vec2( 0.5 );
+	st = rotate2d( sin( time ) * PI ) * st;
+	st += vec2( 0.5 );
+	
+    color += vec3( whiteSquare( st, 0.4 ) );
+    gl_FragColor = vec4( color, 1.0 );
+}
+</script>
+
+
+<script type="text/x-glsl" id="fragment6">
+varying vec2 uVu;
+
+void main()
+{
+	vec2 st = uVu;
+	vec3 color = vec3( 0.0 );
+	
+	st *= 2.0;
+	st = fract(st);
+	
+	color = vec3(st,2.0);
+	
+    gl_FragColor = vec4( color, 1.0 );
+}
+
+</script>
+
+<script type="text/x-glsl" id="fragment1">
+#define PI 3.14159265359
+
+varying vec2 uVu;
+uniform float time;
+
+float box( in vec2 _st, in vec2 _size )
+{
+    _size = vec2( 0.5 ) - _size * 0.5;
+	
+	// smoothstep — perform Hermite interpolation between two values
+    vec2 uv = smoothstep( _size, _size + vec2( 0.001 ), _st );
+    uv *= smoothstep( _size, _size + vec2( 0.001 ), vec2( 1.0 ) - _st );
+	
+    return uv.x * uv.y;
+}
+
+float cross( in vec2 _st, float _size )
+{
+    return  box( _st, vec2( _size, _size / 4.0 ) );// + 
+            //box( _st, vec2( _size / 4.0, _size ) );
+}
+
+mat2 rotate2d( float _angle )
+{
+    return mat2( cos( _angle ), -sin( _angle ),
+                 sin( _angle ),  cos( _angle ) );
+}
+
+void main()
+{
+	vec2 st = uVu;
+	vec3 color = vec3( 0.0 );
+	
+	st -= vec2( 0.5 );
+	st = rotate2d( sin( time ) * PI ) * st;
+	st += vec2( 0.5 );
+	
+    color += vec3( cross( st, 0.2 ) );
+    gl_FragColor = vec4( color, 1.0 );
+}
+</script>
+
+<script type="text/x-glsl" id="fragment2">
+varying vec2 uVu;
+
+void main()
+{
+	vec2 st = uVu;
+	vec3 color = vec3( 5.0 );
+	
+	st += 3.0;
+	st = fract(st);
+	
+	color = vec3(st,0.5);
+	
+    gl_FragColor = vec4( color, 3.0 );
+}
+
+</script>
+
+
+
+
+
+
+
+</body>
+</html>
